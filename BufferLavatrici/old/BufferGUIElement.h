@@ -94,19 +94,10 @@ namespace BufferGUI
   };
 
   static const int MAX_ROWS = 50;
-
-  static const int TABLE_AREA_X = 20;
-  static const int TABLE_AREA_Y = 20;
-  static const int TABLE_AREA_W = 200;
-  static const int TABLE_AREA_H = 260;
-
-  static const int START_TABLE_X = TABLE_AREA_X;
-  static const int START_TABLE_Y = TABLE_AREA_Y;
-
-  static const int TABLE_ROW_WIDTH = TABLE_AREA_W;
+  static const int START_TABLE_X = 20;
+  static const int START_TABLE_Y = 20;
+  static const int TABLE_ROW_WIDTH = 200;
   static const int TABLE_ROW_HEIGHT = 60;
-
-  static const int SWIPE_MOVE = 15;
 
   typedef struct {
     int x;

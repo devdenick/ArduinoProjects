@@ -186,7 +186,12 @@ namespace BufferGUI
     for(int i = 0; i < MAX_ROWS; i++){
       rows[i].x = START_TABLE_X;
       rows[i].y = START_TABLE_Y + (i * TABLE_ROW_HEIGHT);
-      snprintf(rows[i].value, sizeof(rows[i].value), "Articolo %d", i);
+    }
+  }
+
+  void drawTable(lgfx::LGFX_Device& lcd, TableRow* rows){
+    for(int i = 0; i < MAX_ROWS; i++){
+      lcd.drawRect(rows[i].x, rows[i].y, TABLE_ROW_WIDTH, TABLE_ROW_HEIGHT, TFT_WHITE);
     }
   }
 
@@ -194,54 +199,19 @@ namespace BufferGUI
     Serial.println(rows[0].y);
     if(swipeState == UP ){
       for(int i = 0; i < MAX_ROWS; i++){
-        rows[i].y -= SWIPE_MOVE;
+        rows[i].y -= 6;
       }
       return;
     }
     if(swipeState == DOWN && rows[0].y < START_TABLE_Y){
       for(int i = 0; i < MAX_ROWS; i++){
-        rows[i].y += SWIPE_MOVE;
+        rows[i].y += 6;
       }
       return;
     }
   }
 
-  void drawTableSprite(TableRow* rows, lgfx::LGFX_Sprite& tableSprite){
-    tableSprite.fillSprite(TFT_BLACK);//clear dello sprite
-
-    tableSprite.setTextColor(TFT_WHITE, TFT_BLACK);
-    tableSprite.setTextSize(2);
-
-    for (int i = 0; i < MAX_ROWS; i++)
-    {
-      int localX = 0;
-      int localY = rows[i].y - TABLE_AREA_Y;
-
-      if (localY + TABLE_ROW_HEIGHT < 0)
-      {
-        continue;
-      }
-
-      if (localY > TABLE_AREA_H)
-      {
-        continue;
-      }
-
-      tableSprite.drawRect(
-        localX,
-        localY,
-        TABLE_ROW_WIDTH,
-        TABLE_ROW_HEIGHT,
-        TFT_WHITE
-      );
-
-      tableSprite.drawString(
-        rows[i].value,
-        localX + 6,
-        localY + 12
-      );
-    }
-
-    tableSprite.pushSprite(TABLE_AREA_X, TABLE_AREA_Y);
+  void clearTableArea(lgfx::LGFX_Device& lcd){
+    lcd.fillRect(START_TABLE_X, 0, TABLE_ROW_WIDTH, 320, TFT_BLACK);
   }
 }

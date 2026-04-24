@@ -63,5 +63,4 @@ namespace BufferGUI
   void drawTable(lgfx::LGFX_Device& lcd, TableRow* rows);
   void swipeTable(TableRow* rows, SwipeState swipeState);
   void clearTableArea(lgfx::LGFX_Device& lcd);
-  void drawTableSprite(TableRow* rows, lgfx::LGFX_Sprite& tableSprite);
 }

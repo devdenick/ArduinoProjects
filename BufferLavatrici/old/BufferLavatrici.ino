@@ -16,7 +16,7 @@ public:
       auto cfg = _bus_instance.config();
       cfg.spi_host = SPI2_HOST;
       cfg.spi_mode = 0;
-      cfg.freq_write = 40000000;
+      cfg.freq_write = 80000000;
       cfg.freq_read  = 16000000;
       cfg.spi_3wire  = false;
       cfg.use_lock   = true;
@@ -85,7 +85,6 @@ public:
 };
 
 LGFX lcd;
-LGFX_Sprite tableSprite(&lcd);
 
 bool lcdCleared = true;
 
@@ -94,8 +93,6 @@ int prevY;
 BufferGUI::SwipeState prevSwipeState = BufferGUI::STILL;
 
 BufferGUI::TableRow tableRows[BufferGUI::MAX_ROWS];
-
-
 
 void setup()
 {
@@ -113,8 +110,8 @@ void setup()
   BufferGUI::drawWifiTopRight(lcd, false);
 
   BufferGUI::initTable(tableRows);
-  bool ok = tableSprite.createSprite(BufferGUI::TABLE_AREA_W, BufferGUI::TABLE_AREA_H);
-  BufferGUI::drawTableSprite(tableRows, tableSprite);
+  BufferGUI::clearTableArea(lcd);
+  BufferGUI::drawTable(lcd, tableRows);
 
   Serial.println("LovyanGFX avviato.");
 }
@@ -139,7 +136,8 @@ void loop()
     {
       BufferGUI::swipeTable(tableRows, swipeState);
 
-      BufferGUI::drawTableSprite(tableRows, tableSprite);
+      BufferGUI::clearTableArea(lcd);
+      BufferGUI::drawTable(lcd, tableRows);
     }
 
     prevY = y;
@@ -149,4 +147,3 @@ void loop()
     touchHold = false;
   }
 }
-
