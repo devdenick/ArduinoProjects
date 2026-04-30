@@ -13,6 +13,8 @@ namespace BufferGUI
   {
     WifiConnected = 0,
     WifiDisconnected = 1,
+    MqttConnected = 2,
+    MqttDisconnected = 3,
 
     Count
   };
@@ -38,6 +40,12 @@ namespace BufferGUI
     int16_t margin = 1
   );
 
+  void drawMqttTopRight(
+    lgfx::LGFX_Device& lcd,
+    bool connected,
+    int16_t margin = 38
+  );
+
   void clearSprite(
     lgfx::LGFX_Device& lcd,
     GuiSpriteId spriteId,
@@ -61,7 +69,13 @@ namespace BufferGUI
 
   void initTable(TableRow* rows);
   void drawTable(lgfx::LGFX_Device& lcd, TableRow* rows);
-  void swipeTable(TableRow* rows, SwipeState swipeState);
+  void swipeTable(TableRow* rows, SwipeState swipeState, int rowsCount);
+  void drawHeader(lgfx::LGFX_Device& lcd, bool wifiConnected, bool mqttConnected);
+  void drawTableSprite(TableRow* rows, lgfx::LGFX_Sprite& tableSprite,int rowsCount, int selectedCard);
+  int tableRowHitbox(TableRow* rows, int x, int y, int rowsCount);
+  void clearTable(lgfx::LGFX_Device& lcd);
   void clearTableArea(lgfx::LGFX_Device& lcd);
-  void drawTableSprite(TableRow* rows, lgfx::LGFX_Sprite& tableSprite);
+  void clearTableRowsData(TableRow* rows);
+  void drawWaitingPanel(lgfx::LGFX_Sprite& waitingPanelSprite);
+  void clearWaitingPanel(lgfx::LGFX_Sprite& waitingPanelSprite);
 }
