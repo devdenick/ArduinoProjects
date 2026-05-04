@@ -76,6 +76,6 @@ namespace BufferGUI
   void clearTable(lgfx::LGFX_Device& lcd);
   void clearTableArea(lgfx::LGFX_Device& lcd);
   void clearTableRowsData(TableRow* rows);
-  void drawWaitingPanel(lgfx::LGFX_Sprite& waitingPanelSprite);
+  void drawWaitingPanel(lgfx::LGFX_Sprite& waitingPanelSprite, String waitingMessage);
   void clearWaitingPanel(lgfx::LGFX_Sprite& waitingPanelSprite);
 }

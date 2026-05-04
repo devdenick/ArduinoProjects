@@ -6,6 +6,8 @@
 #include <ArduinoJson.h>
 #include <elapsedMillis.h>
 #include "BufferGUI.h"
+#include <ElegantOTA.h>
+#include <WebServer.h>
 
 BufferGUI::LGFX lcd;
 LGFX_Sprite tableSprite(&lcd);
@@ -55,6 +57,37 @@ int selectedCard = -1;
 BufferGUI::SwipeState swipeState;
 bool swiped = false;
 
+WebServer server(80);
+
+unsigned long ota_progress_millis = 0;
+
+bool otaUpdate = false;
+
+void onOTAStart() {
+  // Log when OTA has started
+  Serial.println("OTA update started!");
+  otaUpdate = true;
+  mqttClient.stop();
+}
+
+void onOTAProgress(size_t current, size_t final) {
+  // Log every 1 second
+  if (millis() - ota_progress_millis > 1000) {
+    ota_progress_millis = millis();
+    Serial.printf("OTA Progress Current: %u bytes, Final: %u bytes\n", current, final);
+  }
+}
+
+void onOTAEnd(bool success) {
+  // Log when OTA has finished
+  if (success) {
+    Serial.println("OTA update finished successfully!");
+  } else {
+    Serial.println("There was an error during OTA update!");
+  }
+  otaUpdate = false;
+}
+
 void setup()
 {
   Serial.begin(9600);
@@ -88,69 +121,84 @@ void setup()
   BufferGUI::drawHeader(lcd, wifiConnected, mqttConnected);
   
   //BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);
+  server.on("/", []() {
+    server.send(200, "text/plain", "Hi! This is ElegantOTA Demo.");
+  });
+
+  ElegantOTA.begin(&server);    // Start ElegantOTA
+  // ElegantOTA callbacks
+  ElegantOTA.onStart(onOTAStart);
+  ElegantOTA.onProgress(onOTAProgress);
+  ElegantOTA.onEnd(onOTAEnd);
+
+  server.begin();
 }
 
 void loop()
 {
-  mqttVerifyConnection();
-  handleMqttMessages();
-  int x, y;
-  bool isTouched = lcd.getTouch(&x, &y);
+  server.handleClient();
+  ElegantOTA.loop();
+  if(!otaUpdate){
+    mqttVerifyConnection();
+    handleMqttMessages();
+    int x, y;
+    bool isTouched = lcd.getTouch(&x, &y);
 
-  if(listUpdated){
-    if (isTouched)
-    {
-      if (!touchHold)
+    if(listUpdated){
+      if (isTouched)
       {
-        touchHold = true;
-        prevY = y;
-        touchTimer = 0;
-        return;
-      }
+        if (!touchHold)
+        {
+          touchHold = true;
+          prevY = y;
+          touchTimer = 0;
+          return;
+        }
 
-      selectedCard = BufferGUI::tableRowHitbox(tableRows, x, y, rowsCount);
+        selectedCard = BufferGUI::tableRowHitbox(tableRows, x, y, rowsCount);
 
-      swipeState = BufferGUI::swipe(prevY, y);
+        swipeState = BufferGUI::swipe(prevY, y);
 
-      if (swipeState != BufferGUI::STILL)
-      {
-        swiped = true;
-        BufferGUI::swipeTable(tableRows, swipeState, rowsCount);
-        BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);
+        if (swipeState != BufferGUI::STILL)
+        {
+          swiped = true;
+          BufferGUI::swipeTable(tableRows, swipeState, rowsCount);
+          BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);
+        }
+        else
+          BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, selectedCard);
+        
+
+        //prevY = y;
       }
       else
-        BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, selectedCard);
-      
-
-      //prevY = y;
-    }
-    else
-    {
-      if(touchHold){
-        bool longEnough = touchTimer >= MIN_TOUCH_SELECT_MS;
-        BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);//reset selected card
-        if(!swiped && longEnough){
-          publishCardSelected(selectedCard);
-          listUpdated = false;
-          BufferGUI::clearTableArea(lcd);
+      {
+        if(touchHold){
+          bool longEnough = touchTimer >= MIN_TOUCH_SELECT_MS;
+          BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);//reset selected card
+          if(!swiped && longEnough){
+            publishCardSelected(selectedCard);
+            listUpdated = false;
+            BufferGUI::clearTableArea(lcd);
+          }
+          //BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);//reset selected card
         }
-        //BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);//reset selected card
+        swiped = false;
+        touchHold = false;
       }
-      swiped = false;
-      touchHold = false;
     }
-  }
-  else {
-    if (waitingPanelTimer >= WAITING_PANEL_REFRESH_MS) {
-      waitingPanelTimer = 0;
-      BufferGUI::drawWaitingPanel(waitingPanelSprite);
-    }
+    else {
+      if (waitingPanelTimer >= WAITING_PANEL_REFRESH_MS) {
+        waitingPanelTimer = 0;
+        BufferGUI::drawWaitingPanel(waitingPanelSprite, "WAITING BROKER");
+      }
 
-    if (waitingUpdateRequestTimer >= WAITING_UPDATE_REQUEST_MS) {
-      waitingUpdateRequestTimer = 0;
+      if (waitingUpdateRequestTimer >= WAITING_UPDATE_REQUEST_MS) {
+        waitingUpdateRequestTimer = 0;
 
-      if (mqttClient.connected()) {
-        publishNotifyConnected();
+        if (mqttClient.connected()) {
+          publishNotifyConnected();
+        }
       }
     }
   }

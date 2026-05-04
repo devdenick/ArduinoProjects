@@ -209,7 +209,7 @@ namespace BufferGUI
     lcd.setTextColor(UI_COLOR_TEXT, UI_COLOR_HEADER);
     lcd.setTextSize(2);
     lcd.setCursor(10, 6);
-    lcd.print("Lavaggi");
+    lcd.print("Buffer Lavaggi");
 
     lcd.setTextSize(1);
     lcd.setTextColor(wifiConnected ? UI_COLOR_SUCCESS : UI_COLOR_DANGER, UI_COLOR_HEADER);
@@ -360,7 +360,7 @@ namespace BufferGUI
     }
   }
 
-  void drawWaitingPanel(lgfx::LGFX_Sprite& waitingPanelSprite)
+  void drawWaitingPanel(lgfx::LGFX_Sprite& waitingPanelSprite, String waitingMessage)
   {
     waitingPanelSprite.fillSprite(UI_COLOR_PANEL);
 
@@ -383,7 +383,7 @@ namespace BufferGUI
     waitingPanelSprite.setTextColor(UI_COLOR_TEXT, UI_COLOR_CARD);
     waitingPanelSprite.setTextSize(2);
     waitingPanelSprite.setCursor(panelX + 21, panelY + 15);
-    waitingPanelSprite.print("WAITING BROKER");
+    waitingPanelSprite.print(waitingMessage);
     waitingPanelSprite.setTextColor(UI_COLOR_TEXT_MUTED, UI_COLOR_CARD);
     waitingPanelSprite.setTextSize(2);
     waitingPanelSprite.setCursor(panelX + 87, panelY + 40);
