@@ -33,6 +33,7 @@ int rowsCount = 0;
 WiFiClient wifiClient;
 const char* ssid = "ZFIOT";
 const char* password = "CErrueGQzWESPAaAL6jetewg";//OSTI00048 psw CErrueGQzWESPAaAL6jetewg, Funzionante GwGSXud3jbgfjWuxdXiaKc6S
+String macAddress = "";
 bool wifiConnected = false;
 
 //mqtt
@@ -101,7 +102,7 @@ void setup()
 
   BufferGUI::begin(lcd);
   // WiFi disconnesso inizialmente
-  BufferGUI::drawHeader(lcd, false, false);
+  BufferGUI::drawHeader(lcd, false, false, macAddress);
 
   waitingPanelSprite.setColorDepth(16);
   bool ok = waitingPanelSprite.createSprite(BufferGUI::WAITING_PANEL_WIDTH, BufferGUI::WAITING_PANEL_HEIGHT);
@@ -118,7 +119,7 @@ void setup()
   //INIZIALIZZAZIONE COMUNICAZIONE MQTT
   setupMqttCommunication();
   
-  BufferGUI::drawHeader(lcd, wifiConnected, mqttConnected);
+  BufferGUI::drawHeader(lcd, wifiConnected, mqttConnected, macAddress);
   
   //BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);
   server.on("/", []() {
@@ -213,6 +214,8 @@ void setupWiFiConnection(){
   //wificonnesso
   Serial.print("- IP address: ");
   Serial.println(WiFi.localIP());
+  macAddress = WiFi.macAddress();
+  Serial.println(macAddress);
   wifiConnected = true;
 }
 
@@ -235,7 +238,7 @@ void mqttVerifyConnection(){
   if(!mqttClient.connected()){
     Serial.println("BROKER NON CONNESSO - TENTATIVO RICONNESSIONE");
     mqttConnected = false;
-    BufferGUI::drawHeader(lcd, wifiConnected, mqttConnected);
+    BufferGUI::drawHeader(lcd, wifiConnected, mqttConnected, macAddress);
     listUpdated = false;//broker disconnesso pericolo disallineamento dati devo richiederli
     if (!mqttClient.connect(broker, port)) {
       Serial.print("MQTT connection failed! Error code = ");
@@ -245,7 +248,7 @@ void mqttVerifyConnection(){
       Serial.println("BROKER RICONNESSO");    
       mqttClient.subscribe(readListTopic);
       mqttConnected = true;
-      BufferGUI::drawHeader(lcd, wifiConnected, mqttConnected);
+      BufferGUI::drawHeader(lcd, wifiConnected, mqttConnected, macAddress);
       publishNotifyConnected();
     }
   }

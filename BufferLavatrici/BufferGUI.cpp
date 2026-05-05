@@ -199,7 +199,7 @@ namespace BufferGUI
   ///////////////////HEADER////////////////////////////
   /////////////////////////////////////////////////////
 
-  void drawHeader(lgfx::LGFX_Device& lcd, bool wifiConnected, bool mqttConnected){
+  void drawHeader(lgfx::LGFX_Device& lcd, bool wifiConnected, bool mqttConnected, String macAddr){
     lcd.fillRect(0, 0, lcd.width(), HEADER_HEIGHT, UI_COLOR_HEADER);
     drawWifiTopRight(lcd, wifiConnected);
     drawMqttTopRight(lcd, mqttConnected);
@@ -214,7 +214,9 @@ namespace BufferGUI
     lcd.setTextSize(1);
     lcd.setTextColor(wifiConnected ? UI_COLOR_SUCCESS : UI_COLOR_DANGER, UI_COLOR_HEADER);
     lcd.setCursor(11, 27);
-    lcd.print(wifiConnected ? "ONLINE" : "OFFLINE");
+    String online = "ONLINE "+macAddr;
+    String offline = "OFFLINE";
+    lcd.print(wifiConnected ? online : offline);
 
   }
 
