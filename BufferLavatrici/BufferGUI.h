@@ -71,7 +71,7 @@ namespace BufferGUI
   void drawTable(lgfx::LGFX_Device& lcd, TableRow* rows);
   void swipeTable(TableRow* rows, SwipeState swipeState, int rowsCount);
   void drawHeader(lgfx::LGFX_Device& lcd, bool wifiConnected, bool mqttConnected, String macAddr);
-  void drawTableSprite(TableRow* rows, lgfx::LGFX_Sprite& tableSprite,int rowsCount, int selectedCard);
+  void drawTableSprite(TableRow* rows, lgfx::LGFX_Sprite& tableSprite,int rowsCount, int selectedCard, bool longEnough);
   int tableRowHitbox(TableRow* rows, int x, int y, int rowsCount);
   void clearTable(lgfx::LGFX_Device& lcd);
   void clearTableArea(lgfx::LGFX_Device& lcd);

@@ -96,6 +96,7 @@ namespace BufferGUI
   static constexpr uint16_t UI_COLOR_CARD          = 0x2945; // card pari
   static constexpr uint16_t UI_COLOR_CARD_ALT      = 0x3186; // card dispari
   static constexpr uint16_t UI_COLOR_CARD_SELECTED = 0x7BEF; //card selezionata
+  static constexpr uint16_t UI_COLOR_CARD_SELECTED_LONG_ENOUGH = TFT_DARKGREEN; //card selezionata
   static constexpr uint16_t UI_COLOR_BORDER        = 0x6B4D; // bordo grigio visibile
   static constexpr uint16_t UI_COLOR_TEXT          = TFT_WHITE;
   static constexpr uint16_t UI_COLOR_TEXT_MUTED    = 0xBDF7;
@@ -297,6 +298,8 @@ namespace BufferGUI
     char nome[32];
     char startTimestamp[32];
     int id;
+    char linea;
+    char lotto[32];
   } TableRow;
 
 

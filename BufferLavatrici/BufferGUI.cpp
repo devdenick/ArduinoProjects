@@ -249,7 +249,7 @@ namespace BufferGUI
     }
   }
 
-  void drawTableSprite(TableRow* rows, lgfx::LGFX_Sprite& tableSprite,int rowsCount, int selectedCard)
+  void drawTableSprite(TableRow* rows, lgfx::LGFX_Sprite& tableSprite,int rowsCount, int selectedCard, bool longEnough)
   {
     tableSprite.fillSprite(UI_COLOR_PANEL);
 
@@ -270,7 +270,9 @@ namespace BufferGUI
       }
 
       uint16_t cardColor;
-      if(i == selectedCard)
+      if(i == selectedCard && longEnough)
+        cardColor = UI_COLOR_CARD_SELECTED_LONG_ENOUGH;
+      else if(i == selectedCard && !longEnough)
         cardColor = UI_COLOR_CARD_SELECTED;
       else
         cardColor = (i % 2 == 0) ? UI_COLOR_CARD : UI_COLOR_CARD_ALT;
@@ -291,9 +293,9 @@ namespace BufferGUI
       snprintf(indexText, sizeof(indexText), "%02d", i + 1);
 
       tableSprite.setTextColor(TFT_BLACK, UI_COLOR_PRIMARY);
-      tableSprite.setTextSize(1);
-      tableSprite.setCursor(cardX + 15, cardY + 21);
-      tableSprite.print(indexText);
+      tableSprite.setTextSize(2);
+      tableSprite.setCursor(cardX + 16, cardY + 18);
+      tableSprite.print(rows[i].linea);
 
       // Testo principale.
       tableSprite.setTextColor(UI_COLOR_TEXT, cardColor);
@@ -303,9 +305,9 @@ namespace BufferGUI
 
       // Testo secondario.
       tableSprite.setTextColor(UI_COLOR_TEXT_MUTED, cardColor);
-      tableSprite.setTextSize(1);
+      tableSprite.setTextSize(1.2);
       tableSprite.setCursor(cardX + 44, cardY + 34);
-      tableSprite.print(rows[i].startTimestamp);
+      tableSprite.print(rows[i].lotto);
     }
 
     // Scrollbar solo decorativa: non cambia la logica dello swipe.

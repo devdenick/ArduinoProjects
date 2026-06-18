@@ -32,7 +32,7 @@ int rowsCount = 0;
 //wifi
 WiFiClient wifiClient;
 const char* ssid = "ZFIOT";
-const char* password = "CErrueGQzWESPAaAL6jetewg";//OSTI00048 psw CErrueGQzWESPAaAL6jetewg, Funzionante GwGSXud3jbgfjWuxdXiaKc6S
+const char* password = "GwGSXud3jbgfjWuxdXiaKc6S";//OSTI00048 psw CErrueGQzWESPAaAL6jetewg, Funzionante GwGSXud3jbgfjWuxdXiaKc6S
 String macAddress = "";
 bool wifiConnected = false;
 
@@ -121,7 +121,7 @@ void setup()
   
   BufferGUI::drawHeader(lcd, wifiConnected, mqttConnected, macAddress);
   
-  //BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);
+  //BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1false);
   server.on("/", []() {
     server.send(200, "text/plain", "Hi! This is ElegantOTA Demo.");
   });
@@ -164,10 +164,15 @@ void loop()
         {
           swiped = true;
           BufferGUI::swipeTable(tableRows, swipeState, rowsCount);
-          BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);
+          BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1, false);
         }
-        else
-          BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, selectedCard);
+        else{
+          bool longEnough = touchTimer >= MIN_TOUCH_SELECT_MS;
+          if(longEnough)
+            BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, selectedCard, true);
+          else
+            BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, selectedCard, false);
+        }
         
 
         //prevY = y;
@@ -176,13 +181,13 @@ void loop()
       {
         if(touchHold){
           bool longEnough = touchTimer >= MIN_TOUCH_SELECT_MS;
-          BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);//reset selected card
+          BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1, false);//reset selected card
           if(!swiped && longEnough){
             publishCardSelected(selectedCard);
             listUpdated = false;
             BufferGUI::clearTableArea(lcd);
           }
-          //BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);//reset selected card
+          //BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1, false);//reset selected card
         }
         swiped = false;
         touchHold = false;
@@ -299,7 +304,7 @@ void handleMqttMessages()
 
       listUpdated = true;
       BufferGUI::clearWaitingPanel(waitingPanelSprite);
-      BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1);
+      BufferGUI::drawTableSprite(tableRows, tableSprite, rowsCount, -1, false);
     } else {
       Serial.println("Errore lettura JSON.");
     }
@@ -339,6 +344,13 @@ bool loadTableRowsFromJson(const String& json, int startTableX, int startTableY,
     tableRows[index].y = startTableY + (index * tableRowHeight);
     Serial.println(tableRows[index].y);
     tableRows[index].id = articolo["id"] | -1;
+    const char* linea = articolo["linea"] | "Z";
+    tableRows[index].linea = linea[0];
+    const char* lotto = articolo["lotto"] | "";
+    if (strlen(lotto) > 0)
+      snprintf(tableRows[index].lotto, sizeof(tableRows[index].lotto), "Lotto: %s", lotto);
+    else
+      snprintf(tableRows[index].lotto, sizeof(tableRows[index].lotto), "Lotto assente");
 
     const char* nome = articolo["nome"] | "";
     const char* startTimestamp = articolo["startTimestamp"] | "";
@@ -352,6 +364,10 @@ bool loadTableRowsFromJson(const String& json, int startTableX, int startTableY,
     Serial.print(tableRows[index].id);
     Serial.print(", nome: ");
     Serial.print(tableRows[index].nome);
+    Serial.print(", linea: ");
+    Serial.print(tableRows[index].linea);
+    Serial.print(", lotto: ");
+    Serial.print(lotto);
     Serial.print(", startTimestamp: ");
     Serial.println(tableRows[index].startTimestamp);
 

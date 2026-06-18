@@ -13,7 +13,7 @@ using namespace Opta;
 //MAC FC-84-A7-30-B2-58 PASS rdKR3wVHKGhyyN54Qv6tYgr5	FLOWRACK_2
 WiFiClient wifiClient;
 char SSID[] = "ZFIOT";
-char WIFI_PASS[] = "tVpicCsLsdJHbJpm4d7nv5bx";
+char WIFI_PASS[] = "rdKR3wVHKGhyyN54Qv6tYgr5";
 byte mac[] = {0xA0, 0xCD, 0xF3, 0xB1, 0xEC, 0x1E};
 
 //mqtt vars
