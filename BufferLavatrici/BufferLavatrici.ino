@@ -11,7 +11,7 @@
 
 BufferGUI::LGFX lcd;
 LGFX_Sprite tableSprite(&lcd);
-LGFX_Sprite waitingPanelSprite(&lcd);
+LGFX_Sprite waitingPanelSprite(&lcd);3UW1W1I117962
 
 bool lcdCleared = true;
 
