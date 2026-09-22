@@ -3,7 +3,6 @@
 #include <ArduinoRS485.h>
 #include <ArduinoModbus.h>
 #include <Arduino_PortentaMachineControl.h>
-#include "web_interface.h"
 #include "USBConfigLoader.h"
 #include "can_handler.h"
 
@@ -22,9 +21,12 @@ uint16_t mapCount = 0;
 
 USBConfigLoader configLoader;
 
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+  delay(10000);
   //while (!Serial) {}
 
   Serial.println("Avvio loader config...");
@@ -62,7 +64,7 @@ void setup() {
   }
 
   // Ethernet
-  while (Ethernet.begin(NULL, ip) == 0) {
+  while (Ethernet.begin(mac, ip) == 0) {
     delay(100);
   }
   Serial.println("Ethernet inizializzato.");
@@ -139,6 +141,7 @@ void loop() {
                 if(mappingTable[i].canID != previousCanId){
                   CanMsg msg(CanStandardId(previousCanId), 8, dataSend);
                   CAN.write(msg);
+                  delay(50);
                   previousCanId = mappingTable[i].canID;
                   memset(dataSend, 0, sizeof(dataSend));
                 }
@@ -151,6 +154,7 @@ void loop() {
           if(modbusSourceFound){
             CanMsg msg(CanStandardId(previousCanId), 8, dataSend);
             CAN.write(msg);
+            delay(50);
           }
           //resetto il register di notifica sul plc
           modbusTCPServer.holdingRegisterWrite(FIRST_REGISTER, (uint16_t)0);

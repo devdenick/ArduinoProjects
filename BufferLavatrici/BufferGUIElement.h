@@ -2,92 +2,283 @@
 
 #include <Arduino.h>
 #include <LovyanGFX.hpp>
+#include <lgfx/v1/platforms/esp32s3/Panel_RGB.hpp>
+#include <lgfx/v1/platforms/esp32s3/Bus_RGB.hpp>
 #include "BufferGUI.h"
 
 namespace BufferGUI
 {
 
-  //ESP32 240x320 2.8 screen
-  class LGFX : public lgfx::LGFX_Device
-  {
-    lgfx::Panel_ILI9341 _panel_instance;
-    lgfx::Bus_SPI       _bus_instance;
-    lgfx::Light_PWM     _light_instance;
-    lgfx::Touch_XPT2046 _touch_instance;
+class LGFX : public lgfx::LGFX_Device
+{
+public:
 
-  public:
-    LGFX(void) {
-      { // SPI Bus
-        auto cfg = _bus_instance.config();
-        cfg.spi_host = SPI2_HOST;
-        cfg.spi_mode = 0;
-        cfg.freq_write = 40000000;
-        cfg.freq_read  = 16000000;
-        cfg.spi_3wire  = false;
-        cfg.use_lock   = true;
-        cfg.dma_channel = SPI_DMA_CH_AUTO;
-        cfg.pin_sclk = 14;
-        cfg.pin_mosi = 13;
-        cfg.pin_miso = 12;
-        cfg.pin_dc   = 2;
-        _bus_instance.config(cfg);
-        _panel_instance.setBus(&_bus_instance);
-      }
-  
-      { // TFT Panel
-        auto cfg = _panel_instance.config();
-        cfg.pin_cs           = 15;
-        cfg.pin_rst          = -1;
-        cfg.pin_busy         = -1;
-        cfg.memory_width     = 240;
-        cfg.memory_height    = 320;
-        cfg.panel_width      = 240;
-        cfg.panel_height     = 320;
-        cfg.offset_x         = 0;
-        cfg.offset_y         = 0;
-        cfg.offset_rotation  = 0;//5
-        cfg.dummy_read_pixel = 8;
-        cfg.dummy_read_bits  = 1;
-        cfg.readable         = true;//false;
-        cfg.invert           = false;
-        cfg.rgb_order        = false;
-        cfg.dlen_16bit       = false;
-        cfg.bus_shared       = false;
-        _panel_instance.config(cfg);
-      }
-  
-      { // Backlight (optional)
-        auto cfg = _light_instance.config();
-        cfg.pin_bl = 21;
-        cfg.invert = false;
-        cfg.freq = 44100;
-        cfg.pwm_channel = 7;
-        _light_instance.config(cfg);
-        _panel_instance.setLight(&_light_instance);
-      }
-  
-      { // XPT2046 Touchscreen
-        auto cfg = _touch_instance.config();
-        cfg.x_min      = 652;//222;
-        cfg.x_max      = 3620;//3367;
-        cfg.y_min      = 350;//192;
-        cfg.y_max      = 3750;//3732;
-        cfg.pin_int    = -1;
-        cfg.bus_shared = true;
-        cfg.offset_rotation = 4; //6;
-        cfg.spi_host   = SPI3_HOST;
-        cfg.freq       = 1000000;
-        cfg.pin_sclk   = 25; //14; DCLK
-        cfg.pin_mosi   = 32; //13; DIN
-        cfg.pin_miso   = 39; //12; DOUT
-        cfg.pin_cs     = 33; //33; /CS
-        _touch_instance.config(cfg);
-        _panel_instance.setTouch(&_touch_instance);
-      }
-  
-      setPanel(&_panel_instance);
+  lgfx::Bus_RGB       _bus_instance;
+  lgfx::Panel_RGB     _panel_instance;
+  lgfx::Light_PWM     _light_instance;
+  lgfx::Touch_FT5x06  _touch_instance;
+
+
+  LGFX(void)
+  {
+    // ======================================================
+    // PANEL
+    // ======================================================
+
+    {
+      auto cfg = _panel_instance.config();
+
+      cfg.memory_width  = 800;
+      cfg.memory_height = 480;
+
+      cfg.panel_width   = 800;
+      cfg.panel_height  = 480;
+
+      cfg.offset_x = 0;
+      cfg.offset_y = 0;
+
+      cfg.pin_cs   = -1;
+      cfg.pin_rst  = -1;
+      cfg.pin_busy = -1;
+
+      // RGB panel
+      cfg.readable   = true;
+      cfg.invert     = false;
+      cfg.rgb_order  = false;
+      cfg.dlen_16bit = false;
+      cfg.bus_shared = false;
+
+      _panel_instance.config(cfg);
     }
-  };
+
+
+    // ======================================================
+    // FRAMEBUFFER IN PSRAM
+    // ======================================================
+
+    {
+      auto cfg =
+        _panel_instance.config_detail();
+
+      // 2 = PSRAM only. Nella versione attuale di LovyanGFX il Bus_RGB
+      // alloca comunque il framebuffer principale in PSRAM; lo lasciamo
+      // esplicito per documentare l'intento.
+      cfg.use_psram = 2;
+
+      _panel_instance.config_detail(cfg);
+    }
+
+
+    // ======================================================
+    // RGB BUS
+    // ======================================================
+
+    {
+      auto cfg = _bus_instance.config();
+
+      cfg.panel = &_panel_instance;
+
+      // ----------------------------------------------------
+      // BLUE
+      // ----------------------------------------------------
+
+      cfg.pin_d0 = GPIO_NUM_8;   // B0
+      cfg.pin_d1 = GPIO_NUM_3;   // B1
+      cfg.pin_d2 = GPIO_NUM_46;  // B2
+      cfg.pin_d3 = GPIO_NUM_9;   // B3
+      cfg.pin_d4 = GPIO_NUM_1;   // B4
+
+      // ----------------------------------------------------
+      // GREEN
+      // ----------------------------------------------------
+
+      cfg.pin_d5  = GPIO_NUM_5;   // G0
+      cfg.pin_d6  = GPIO_NUM_6;   // G1
+      cfg.pin_d7  = GPIO_NUM_7;   // G2
+      cfg.pin_d8  = GPIO_NUM_15;  // G3
+      cfg.pin_d9  = GPIO_NUM_16;  // G4
+      cfg.pin_d10 = GPIO_NUM_4;   // G5
+
+      // ----------------------------------------------------
+      // RED
+      // ----------------------------------------------------
+
+      cfg.pin_d11 = GPIO_NUM_45;  // R0
+      cfg.pin_d12 = GPIO_NUM_48;  // R1
+      cfg.pin_d13 = GPIO_NUM_47;  // R2
+      cfg.pin_d14 = GPIO_NUM_21;  // R3
+      cfg.pin_d15 = GPIO_NUM_14;  // R4
+
+      // ----------------------------------------------------
+      // CONTROL SIGNALS
+      // ----------------------------------------------------
+
+      cfg.pin_hsync   = GPIO_NUM_39;
+      cfg.pin_vsync   = GPIO_NUM_41;
+      cfg.pin_henable = GPIO_NUM_40; // DE
+      cfg.pin_pclk    = GPIO_NUM_42;
+
+      // ----------------------------------------------------
+      // PIXEL CLOCK
+      //
+      // Configurazione ufficiale 4D Systems per 43CT
+      // ----------------------------------------------------
+
+      cfg.freq_write = 16000000;
+
+      // ----------------------------------------------------
+      // HORIZONTAL TIMING
+      // ----------------------------------------------------
+
+      cfg.hsync_polarity    = 0;
+
+      cfg.hsync_front_porch = 8;
+      cfg.hsync_pulse_width = 4;
+      cfg.hsync_back_porch  = 8;
+
+      // ----------------------------------------------------
+      // VERTICAL TIMING
+      // ----------------------------------------------------
+
+      cfg.vsync_polarity    = 0;
+
+      cfg.vsync_front_porch = 8;
+      cfg.vsync_pulse_width = 4;
+      cfg.vsync_back_porch  = 8;
+
+      // ----------------------------------------------------
+      // PCLK
+      //
+      // 4D utilizza il dato sul falling edge.
+      // ----------------------------------------------------
+
+      cfg.pclk_active_neg = true;
+      cfg.pclk_idle_high  = true;
+
+      cfg.de_idle_high = false;
+
+      _bus_instance.config(cfg);
+    }
+
+    _panel_instance.setBus(&_bus_instance);
+
+
+    // ======================================================
+    // BACKLIGHT
+    // ======================================================
+
+    {
+      auto cfg =
+        _light_instance.config();
+
+      // Backlight ufficiale gen4 RGB
+      cfg.pin_bl = GPIO_NUM_2;
+
+      cfg.invert = false;
+
+      // La libreria 4D usa 25 kHz
+      cfg.freq = 25000;
+
+      cfg.pwm_channel = 7;
+
+      _light_instance.config(cfg);
+
+      _panel_instance.setLight(
+        &_light_instance
+      );
+    }
+
+
+    // ======================================================
+    // TOUCH
+    //
+    // FT5446 compatibile con protocollo FT5x06.
+    //
+    // SDA = GPIO17
+    // SCL = GPIO18
+    // ADDR = 0x38
+    //
+    // INT e RESET NON sono GPIO ESP32 diretti:
+    // sono collegati al TCA9554.
+    //
+    // Per questo pin_int e pin_rst restano -1.
+    // Lovyan lavorerà in polling I2C.
+    // ======================================================
+
+    {
+      auto cfg =
+        _touch_instance.config();
+
+      /*
+       * ATTENZIONE:
+       *
+       * Il controller touch 4D presenta gli assi
+       * fisici scambiati rispetto al pannello RGB.
+       *
+       * RAW X -> 0 ... 479
+       * RAW Y -> 0 ... 799
+       */
+
+      cfg.x_min = 0;
+      cfg.x_max = 479;
+
+      cfg.y_min = 0;
+      cfg.y_max = 799;
+
+      // Interrupt collegato all'expander,
+      // quindi non possiamo indicare un GPIO ESP32.
+
+      cfg.pin_int = -1;
+
+      // Stessa cosa per RESET.
+
+      cfg.pin_rst = -1;
+
+      cfg.bus_shared = false;
+
+      /*
+       * Questo offset permette di riallineare gli assi
+       * FT5446 a quelli del display.
+       *
+       * Con lcd.setRotation(3):
+       *
+       * X = 479 - RAW_X
+       * Y = RAW_Y
+       *
+       * che replica la trasformazione usata
+       * dalla libreria originale 4D in PORTRAIT.
+       */
+
+      cfg.offset_rotation = 7;
+
+      // ----------------------------------------------------
+      // I2C
+      // ----------------------------------------------------
+
+      cfg.i2c_port = I2C_NUM_0;
+
+      cfg.pin_sda = GPIO_NUM_17;
+      cfg.pin_scl = GPIO_NUM_18;
+
+      cfg.freq = 400000;
+
+      cfg.i2c_addr = 0x38;
+
+      _touch_instance.config(cfg);
+
+      _panel_instance.setTouch(
+        &_touch_instance
+      );
+    }
+
+
+    // ======================================================
+    // REGISTRA PANEL
+    // ======================================================
+
+    setPanel(&_panel_instance);
+  }
+};
 
   // Palette colori
   static constexpr uint16_t UI_COLOR_BG            = TFT_BLACK;
@@ -257,27 +448,28 @@ namespace BufferGUI
     }
   };
 
-  enum SwipeState
-  {
-    UP,
-    DOWN,
-    STILL
-  };
-
   static const int HEADER_HEIGHT = 38;
 
   static const int MAX_ROWS = 50;
 
-  static const int TABLE_AREA_X = 20;
+  // gen4-ESP32-43CT in PORTRAIT = 480 x 800.
+  // Leave 20 px side margins and some space at the bottom.
+  static const int TABLE_AREA_X = 20; 
   static const int TABLE_AREA_Y = 60;
-  static const int TABLE_AREA_W = 200;
-  static const int TABLE_AREA_H = 260;
+  static const int TABLE_AREA_W = 440;
+  static const int TABLE_AREA_H = 700;
+
+  // La parte destra viene riservata alla scrollbar.
+  // Così durante lo scroll possiamo copiare solo il contenuto e ridisegnare
+  // la scrollbar separatamente, senza trascinarne copie fantasma.
+  static const int TABLE_SCROLLBAR_ZONE_W = 12;
+  static const int TABLE_CONTENT_W = TABLE_AREA_W - TABLE_SCROLLBAR_ZONE_W;
 
   static const int START_TABLE_X = TABLE_AREA_X;
   static const int START_TABLE_Y = TABLE_AREA_Y;
 
-  static const int TABLE_ROW_WIDTH = TABLE_AREA_W;
-  static const int TABLE_ROW_HEIGHT = 60;
+  static const int TABLE_ROW_WIDTH = TABLE_CONTENT_W;
+  static const int TABLE_ROW_HEIGHT = 200;
 
   static const int WAITING_PANEL_X = 5;
   static const int WAITING_PANEL_Y = 60;
@@ -286,12 +478,6 @@ namespace BufferGUI
   static const int WAITING_PANEL_BOX_MARGIN = 10;
   static const int WAITING_PANEL_BOX_WIDTH = 210;
   static const int WAITING_PANEL_BOX_HEIGHT = 80;
-  static int waitingCounter = 0;
-
-
-  static const int SWIPE_SENS = 20;
-  static const int SWIPE_MOVE = 15;
-
   typedef struct {
     int x;
     int y;

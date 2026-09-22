@@ -1,0 +1,29 @@
+#include "gfx4desp32_%%displaynm%%.h"
+#include <WiFi.h>
+
+gfx4desp32_%%displaynm%% gfx = gfx4desp32_%%displaynm%%();
+
+#include "aaaaConst.h"    // Note. This file will not be created if there are no generated graphics
+
+// Uncomment if using GC* in program flash.
+// #include "aaaaGCx.h"     // Note. This file will be generated when graphics destination program flash
+
+void setup()
+{
+     Serial.begin(115200);
+    delay(2000);
+
+    WiFi.mode(WIFI_STA);
+
+    Serial.println();
+    Serial.println("=== gen4-ESP32-43CT ===");
+
+    Serial.print("WiFi MAC Address: ");
+    Serial.println(WiFi.macAddress());
+} // end Setup **do not alter, remove or duplicate this line**
+
+void loop()
+{
+  // put your main code here, to run repeatedly:
+}
+

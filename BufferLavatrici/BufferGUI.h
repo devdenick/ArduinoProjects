@@ -7,7 +7,7 @@
 namespace BufferGUI
 {
   /////////////////////////////////////////////////////
-  ///////////////////WIFI SPRITE///////////////////////
+  ///////////////////WIFI/MQTT ICONS///////////////////
   /////////////////////////////////////////////////////
   enum class GuiSpriteId : uint8_t
   {
@@ -15,7 +15,6 @@ namespace BufferGUI
     WifiDisconnected = 1,
     MqttConnected = 2,
     MqttDisconnected = 3,
-
     Count
   };
 
@@ -43,39 +42,70 @@ namespace BufferGUI
   void drawMqttTopRight(
     lgfx::LGFX_Device& lcd,
     bool connected,
-    int16_t margin = 38
-  );
-
-  void clearSprite(
-    lgfx::LGFX_Device& lcd,
-    GuiSpriteId spriteId,
-    int16_t x,
-    int16_t y,
-    uint16_t backgroundColor = TFT_BLACK
+    int16_t margin = 22
   );
 
   void destroy();
 
-  int16_t getSpriteWidth(GuiSpriteId spriteId);
-  int16_t getSpriteHeight(GuiSpriteId spriteId);
   /////////////////////////////////////////////////////
-  ///////////////////GESTURES//////////////////////////
+  ///////////////////HEADER////////////////////////////
   /////////////////////////////////////////////////////
-  SwipeState swipe(int prevY, int y);
+  void drawHeader(
+    lgfx::LGFX_Device& lcd,
+    bool wifiConnected,
+    bool mqttConnected,
+    const String& macAddr,
+    int cobotMission
+  );
 
   /////////////////////////////////////////////////////
   ///////////////////TABLE/////////////////////////////
   /////////////////////////////////////////////////////
-
   void initTable(TableRow* rows);
-  void drawTable(lgfx::LGFX_Device& lcd, TableRow* rows);
-  void swipeTable(TableRow* rows, SwipeState swipeState, int rowsCount);
-  void drawHeader(lgfx::LGFX_Device& lcd, bool wifiConnected, bool mqttConnected, String macAddr);
-  void drawTableSprite(TableRow* rows, lgfx::LGFX_Sprite& tableSprite,int rowsCount, int selectedCard, bool longEnough);
-  int tableRowHitbox(TableRow* rows, int x, int y, int rowsCount);
-  void clearTable(lgfx::LGFX_Device& lcd);
+
+  void drawTable(
+    lgfx::LGFX_Device& lcd,
+    TableRow* rows,
+    int rowsCount,
+    int selectedCard = -1,
+    bool longEnough = false
+  );
+
+  void redrawTableRow(
+    lgfx::LGFX_Device& lcd,
+    TableRow* rows,
+    int rowsCount,
+    int rowIndex,
+    bool selected,
+    bool longEnough
+  );
+
+  // Sposta la tabella di deltaY pixel seguendo il dito.
+  // Ritorna il delta realmente applicato dopo il clamp ai limiti.
+  int scrollTableByPixels(
+    lgfx::LGFX_Device& lcd,
+    TableRow* rows,
+    int rowsCount,
+    int deltaY
+  );
+
+  int tableRowHitbox(
+    TableRow* rows,
+    int x,
+    int y,
+    int rowsCount
+  );
+
   void clearTableArea(lgfx::LGFX_Device& lcd);
   void clearTableRowsData(TableRow* rows);
-  void drawWaitingPanel(lgfx::LGFX_Sprite& waitingPanelSprite, String waitingMessage);
-  void clearWaitingPanel(lgfx::LGFX_Sprite& waitingPanelSprite);
+
+  /////////////////////////////////////////////////////
+  ///////////////////WAITING PANEL/////////////////////
+  /////////////////////////////////////////////////////
+  void drawWaitingPanel(
+    lgfx::LGFX_Device& lcd,
+    const String& waitingMessage
+  );
+
+  void clearWaitingPanel(lgfx::LGFX_Device& lcd);
 }

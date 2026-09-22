@@ -1,0 +1,10 @@
+{
+  "additionalFiles": "..\\..",
+  "builtInLibrariesFolders": "C:\\Users\\Z0330872\\AppData\\Local\\Arduino15\\libraries",
+  "compiler.optimization_flags": "-Os",
+  "customBuildProperties": "",
+  "fqbn": "esp32:esp32:gen4-ESP32-S3R8n16:UploadSpeed=115200,USBMode=default,CDCOnBoot=cdc,MSCOnBoot=default,DFUOnBoot=default,UploadMode=default,CPUFreq=240,FlashSize=16M,PartitionScheme=gen4esp32scheme1,DebugLevel=none,LoopCore=1,EventsCore=1,EraseFlash=none,DisplayModel=esp32s3_43ct_qspi",
+  "hardwareFolders": "C:\\Users\\Z0330872\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.11,C:\\Users\\Z0330872\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\3.3.11",
+  "otherLibrariesFolders": "c:\\Users\\Z0330872\\OneDrive - ZF Friedrichshafen AG\\Documents\\Arduino\\libraries",
+  "sketchLocation": "C:\\Users\\Z0330872\\OneDrive - ZF Friedrichshafen AG\\Sources\\ArduinoSketch\\BufferLavatrici43CT\\buffer43CT"
+}
